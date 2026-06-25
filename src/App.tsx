@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useSmartMaqueiroData } from "./hooks/useSmartMaqueiroData";
 import { LoginScreen, HospitalVidaLogo } from "./components/LoginScreen";
+import { MuralPanel } from "./components/MuralPanel";
 import { GOOGLE_APPS_SCRIPT_CODE } from "./gas-code";
 import { 
   Activity, 
+  Monitor,
   PlusCircle, 
   CheckCircle2, 
   Clock, 
@@ -71,7 +73,10 @@ export default function App() {
   } = useSmartMaqueiroData();
 
   // Navigation tab
-  const [activeTab, setActiveTab] = useState<'fila' | 'dashboard' | 'logs' | 'gas' | 'usuarios'>('fila');
+  const [activeTab, setActiveTab] = useState<'fila' | 'dashboard' | 'logs' | 'gas' | 'usuarios' | 'mural'>('fila');
+  
+  // Public Mural panel viewing state (when not logged in)
+  const [showPublicPanel, setShowPublicPanel] = useState(false);
   
   // Admin Create User form state
   const [newUsername, setNewUsername] = useState("");
@@ -188,9 +193,27 @@ export default function App() {
     }
   };
 
+  // Render Mural Panel directly if the public panel is activated (for TV monitor/dashboard visualizers)
+  if (showPublicPanel) {
+    return (
+      <MuralPanel 
+        chamados={chamados} 
+        onClose={() => setShowPublicPanel(false)} 
+        onRefresh={() => recarregar()}
+        loading={loading}
+      />
+    );
+  }
+
   // Render Login interface if user isn't authenticated
   if (!user) {
-    return <LoginScreen onLogin={login} loading={loading} />;
+    return (
+      <LoginScreen 
+        onLogin={login} 
+        loading={loading} 
+        onOpenPanel={() => setShowPublicPanel(true)} 
+      />
+    );
   }
 
   // Filtered Chamados List
@@ -553,6 +576,19 @@ export default function App() {
           </button>
 
           <button
+            id="tab-btn-mural"
+            onClick={() => setActiveTab('mural')}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-wider flex items-center gap-2 cursor-pointer ${
+              activeTab === 'mural' 
+                ? 'bg-teal-50 text-teal-700 border border-teal-200 shadow-sm font-extrabold' 
+                : 'text-slate-500 hover:bg-teal-50/30 hover:text-teal-600'
+            }`}
+          >
+            <Monitor className="h-4 w-4 text-teal-500" />
+            Mural Monitor (TV)
+          </button>
+
+          <button
             id="tab-btn-dashboard"
             onClick={() => setActiveTab('dashboard')}
             className={`px-3 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-wider flex items-center gap-2 cursor-pointer ${
@@ -843,6 +879,19 @@ export default function App() {
 
         {/* --- MAIN INTERACTIVE DISPLAY (Tabs Rendered dynamically) --- */}
         <main className="col-span-12 lg:col-span-9 bg-[#f8fbfe] flex flex-col overflow-y-auto scrollbar-thin text-slate-800">
+
+          {/* TAB: REAL-TIME PRIORITY MURAL FOR TV / TERMINALS */}
+          {activeTab === 'mural' && (
+            <div className="flex flex-col flex-1 min-h-[calc(100vh-4rem)]">
+              <MuralPanel 
+                chamados={chamados} 
+                onClose={() => setActiveTab('fila')} 
+                isLoggedIn={true}
+                onRefresh={() => recarregar()}
+                loading={loading}
+              />
+            </div>
+          )}
 
           {/* TAB 1: REAL-TIME COLLABORATIVE TIMELINE QUEUE */}
           {activeTab === 'fila' && (

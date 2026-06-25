@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Usuario } from "../types";
-import { ShieldAlert, Heart, Truck, HelpCircle, ArrowRight, UserCheck } from "lucide-react";
+import { ShieldAlert, Heart, Truck, HelpCircle, ArrowRight, UserCheck, Activity, Monitor } from "lucide-react";
 import { motion } from "motion/react";
 
 interface LoginProps {
   onLogin: (username: string, password: string) => Promise<any>;
   loading: boolean;
+  onOpenPanel?: () => void;
 }
 
 // Highly precise SVG clover flower made of 4 hearts in the exact shades of the Hospital Vida logo
@@ -36,7 +37,7 @@ export function HospitalVidaLogo({ className = "w-20 h-20" }: { className?: stri
   );
 }
 
-export function LoginScreen({ onLogin, loading }: LoginProps) {
+export function LoginScreen({ onLogin, loading, onOpenPanel }: LoginProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   
@@ -110,12 +111,35 @@ export function LoginScreen({ onLogin, loading }: LoginProps) {
 
         {/* Auth Panel card */}
         <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-150 backdrop-blur-sm">
-          <div className="border-b border-slate-100 pb-4 mb-5">
+          <div className="border-b border-slate-100 pb-4 mb-4">
             <h3 className="text-sm font-bold text-[#002C54] uppercase tracking-wider flex items-center gap-1.5">
               Portal de Identificação Profissional
             </h3>
             <p className="text-xs text-slate-500 mt-1 font-medium">Insira suas credenciais corporativas do Hospital Vida para iniciar o plantão.</p>
           </div>
+
+          {/* Quick Realtime TV Mural Panel Gateway */}
+          {onOpenPanel && (
+            <div className="mb-5">
+              <motion.button
+                id="btn-login-to-mural"
+                type="button"
+                onClick={onOpenPanel}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-black py-3 px-4 text-xs uppercase tracking-wider shadow-md shadow-teal-600/10 hover:shadow-teal-600/25 transition cursor-pointer"
+              >
+                <Monitor className="h-4.5 w-4.5 animate-pulse" />
+                Acessar Painel / Mural de Macas (TV)
+              </motion.button>
+              
+              <div className="relative flex py-3.5 items-center">
+                <div className="flex-grow border-t border-slate-100"></div>
+                <span className="flex-shrink mx-3 text-[9px] uppercase tracking-widest text-slate-400 font-black">Ou Identifique-se</span>
+                <div className="flex-grow border-t border-slate-100"></div>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Custom Inputs with High Usability Design */}
